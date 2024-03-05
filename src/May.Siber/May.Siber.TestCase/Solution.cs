@@ -12,55 +12,62 @@
 			if (K.Length == 1) return K[0];
 
 			//Eğer 2 kutu varsa
-			if(K.Length == 2)
+			if (K.Length == 2)
 			{
-				if (K[0] > K[1]) return K[0]*2;
+				if (K[0] > K[1]) return K[0] * 2;
 
-				return K[1]*2;
+				return K[1] * 2;
 			}
 
-
-			//İlk olarak en uzun kutunun konumunu bul
-			var firstLongestBoxId = GetLongestBox(K, out int longestBoxHeight);
-
-			//İlk Kolinin alanı, en uzun koliyi içerecek şekilde hesaplanır.
-			var firstPackageSize = longestBoxHeight * (firstLongestBoxId + 1);
-
-			//En uzun koliden sonraki kutuları ikinci koliye yerleştirebiliriz. 
-			//Bunun için kalan kutuları yeni bir diziye alıp en uzun olanı hesaplamamız yeterli olacaktır.
-			var secondPackageWidth = K.Length - firstLongestBoxId - 1;
-			var secondPackageItems = new List<int>(secondPackageWidth);
-			if (K.Length - 1 > firstLongestBoxId)
+			var minimumPackageArea = int.MaxValue;
+			//İlk kolideki son kutunun indeksi i olsun;
+			for (int i = 0; i < K.Length; i++)
 			{
-				for (var i = firstLongestBoxId+1; i < K.Length; i++)
+				//İlk olarak en uzun kutunun konumunu bul
+				var firstPackageItems = K.Take(i + 1).ToArray();
+
+
+				var longestBoxLength = GetLongestBoxLength(firstPackageItems);
+
+				var firstPackageWidth = firstPackageItems.Length;
+
+				//ilk kutunun boyutunu hesapla
+				var firstPackageSize = longestBoxLength * firstPackageWidth;
+
+				//En uzun koliden sonraki kutuları ikinci koliye yerleştirebiliriz. 
+				//Bunun için kalan kutuları yeni bir diziye alıp en uzun olanı hesaplamamız yeterli olacaktır.
+
+				//Eğer ilk koli, tüm kutuları içermiyorsa
+				var secondPackageSize = 0;
+				if (firstPackageItems.Length < K.Length)
 				{
-					secondPackageItems.Add(K[i]);
+
+					var secondPackageItems = K.Skip(i + 1).Take(K.Length - firstPackageItems.Length).ToArray();
+					longestBoxLength = GetLongestBoxLength(secondPackageItems);
+					var secondPackageWidth = secondPackageItems.Length;
+					secondPackageSize = longestBoxLength * secondPackageWidth;
 				}
+				var packageArea = firstPackageSize + secondPackageSize;
 
-			}
-
-
-			var L = secondPackageItems.ToArray();
-			GetLongestBox(L, out longestBoxHeight);
-
-			var secondPackageSize = longestBoxHeight * secondPackageWidth;
-
-			return firstPackageSize + secondPackageSize;
+				if (minimumPackageArea > packageArea)
+				{
+					minimumPackageArea = packageArea;
+				} 
+			} 
+			return minimumPackageArea;
 		}
 
-		private int GetLongestBox(int[] K, out int maxSize)
+		private int GetLongestBoxLength(int[] K)
 		{
-			var maxIdx = 0;
-			maxSize = int.MinValue;
+			var maxSize = int.MinValue;
 			for (int i = 0; i < K.Length; i++)
 			{
 				if (K[i] >= maxSize)
 				{
-					maxIdx = i;
 					maxSize = K[i];
 				}
 			}
-			return maxIdx;
+			return maxSize;
 		}
 
 	}
